@@ -60,6 +60,24 @@ Pour ajouter un mod :
 - Le `server.properties` côté serveur a `online-mode=false` → tout pseudo fonctionne (crack + premium).
 - Si l'écran de login EasyAuth apparaît : `/register <password>` puis `/login <password>` à la première connexion.
 
+## Accès au serveur
+
+L'URL publique `mc.alabalec.net` (46.224.191.111) n'est **pas encore** routée vers lx-gaming. Pour l'instant, accès uniquement via :
+
+- **Tailnet** : `lx-gaming:25565` (100.83.118.18:25565)
+- **RCON** : `lx-gaming:25575` (mot de passe Vault `MC server RCON password - 2026-10-19`)
+
+Pour rejoindre :
+1. Lanceur MC 26.3
+2. Multiplayer → Add Server → `lx-gaming:25565`
+3. Première connexion : `/register <password>` puis `/login <password>` (EasyAuth)
+4. Pour les admins : `/vanish` (mod Vanish)
+
+## Compatibilité
+
+- Loader : **Fabric Loader 0.19.5** (auto-installé côté serveur via itzg/minecraft-server)
+- Mods serveur : Sodium (ignoré), Iris (ignoré), Lithium, FerriteCore, Krypton, Distant Horizons 3.3.4, EasyAuth, Vanish, ViaFabric, Cloth Config, Fabric Language Kotlin, Fabric API
+
 ## Version
 
 v1.0.0 — bundle initial MC 26.3 + Fabric 0.16.3

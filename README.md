@@ -283,6 +283,32 @@ Ou via MultiMC/Prism : ajoute une instance "Fabric" depuis le launcher, sélecti
 
 ---
 
+
+
+### 4. SKLauncher a installé ses propres mods 26.1 par défaut
+
+Si tu utilises **SKLauncher** (ou TLauncher avec profil Fabric), le launcher peut **injecter ses propres mods** (Zoomify, Controlify, YetAnotherConfigLib, ViaFabric-mc26-1) qui sont pour **MC 26.1** et bloquent le boot MC 26.3 avec :
+
+```
+Incompatible mods found!
+net.fabricmc.loader.impl.FormattedException: Some of your mods are incompatible with the game or each other!
+```
+
+**Fix** : réinstalle mon modpack avec `-Clean` (ça wipe les mods 26.1) :
+
+```powershell
+irm https://raw.githubusercontent.com/artlab-org/mc-modpack-client/main/install.ps1 | iex -args @{Launcher='sklauncher'; Clean=$true}
+```
+
+OU manuellement :
+1. Va dans `versions\<ton_profil_fabric>\mods\`
+2. Supprime tous les .jar qui ne sont PAS dans la liste de mon modpack :
+   `fabric-api`, `sodium`, `iris`, `lithium`, `ferrite-core`, `krypton`, `modmenu`, `cloth-config`, `distanthorizons`, `fabric-language-kotlin`, `viafabric`, `chunky`
+3. Relance MC
+
+Note : `ViaFabric` a 2 versions (`viafabric` pour 26.3 et `viafabric-mc26-1` pour 26.1). Tu dois garder uniquement la version **26.3**.
+
+
 ## Crash report à m'envoyer si rien ne marche
 
 Si après ces 3 fixes le jeu crashe encore, envoie-moi :

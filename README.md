@@ -245,6 +245,59 @@ Si le serveur est down, contacte un admin.
 
 ---
 
+---
+
+## Troubleshooting — le jeu ne se lance pas
+
+Si MC crashe au lancement avec le modpack, **99% du temps c'est l'une de ces 3 causes** :
+
+### 1. Mauvaise version MC chargée (cause #1)
+
+Le launcher Mojang officiel télécharge la dernière version stable automatiquement (en ce moment **26.5+** qui peut être incompatible avec les mods 26.3). **Tu dois forcer MC 26.3** :
+
+1. Ouvre le launcher Mojang
+2. À côté de **Jouer**, clique sur la version affichée (probablement "Latest release" ou un X.Y+)
+3. Sélectionne **26.3** dans le menu déroulant
+4. Relance → le modpack Fabric devrait charger
+
+Vérification : le serveur tourne en MC **26.3 protocol 777**. Si tu essaies 26.4+, le serveur te kickera avec "Incompatible client".
+
+### 2. Mauvais Java utilisé (cause #2)
+
+MC 26.3 utilise Java 25 LTS. Si ton launcher utilise Java 8 ou 11 (par défaut sur Windows), Java crash.
+
+**Vérification** : ouvre un terminal et tape `java -version`. Tu dois voir Java 21+ (idéalement 25).
+
+**Fix** : dans le launcher Mojang → **Installations** → choisis ton profil Fabric → **Edit** → **Java version** → change vers 21+ (bouton "..." à droite du champ Java executable). Si Java 21+ n'est pas listé, installe-le via Adoptium (https://adoptium.net/) et pointe le launcher vers le chemin complet (`C:\Program Files\Eclipse Adoptium\jdk-25.0.4.1-hotspot\bin\javaw.exe`).
+
+### 3. Fabric Loader pas installé ou mauvaise version (cause #3)
+
+Le modpack a besoin de **Fabric Loader 0.19.5**. Si tu utilises un profil vanilla sans Fabric Loader :
+
+1. Va sur https://maven.fabricmc.net/net/fabricmc/fabric-loader/0.19.5/fabric-loader-0.19.5.jar
+2. Télécharge `fabric-loader-0.19.5.jar`
+3. Lance-le avec Java 21+ : `java -jar fabric-loader-0.19.5.jar client -mcversion 26.3 -loader 0.19.5`
+4. Sélectionne ton profil MC 26.3, clique **Install**
+
+Ou via MultiMC/Prism : ajoute une instance "Fabric" depuis le launcher, sélectionne version 26.3, installe, mets les mods dans `.minecraft/mods/`.
+
+---
+
+## Crash report à m'envoyer si rien ne marche
+
+Si après ces 3 fixes le jeu crashe encore, envoie-moi :
+1. **logs/latest.log** depuis `.minecraft/logs/latest.log` (ou `.minecraft/versions/1.21.x-yyyy.z.z/latest.log`)
+2. **crash-reports/latest.txt** depuis `.minecraft/crash-reports/`
+3. **Version MC** exacte (en haut du launcher)
+4. **Version Java** (`java -version` dans un terminal)
+5. **OS** + version launcher (officiel/MultiMC/Prism/TLauncher/SKLauncher)
+6. **Contenu de .minecraft/mods/** (`ls .minecraft/mods/`)
+
+Avec ça je peux diagnostiquer en 30s.
+
+
+---
+
 ## License
 
 MIT — voir [LICENSE](./LICENSE).

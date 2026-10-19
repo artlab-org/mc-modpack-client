@@ -1,0 +1,14 @@
+# Generated configs
+/config/*.json.bak
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Local
+*.log

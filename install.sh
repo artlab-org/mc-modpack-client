@@ -105,16 +105,17 @@ find_mods_dir() {
                 exit 1
             fi
 
-            # Find a profile directory matching MC version + Fabric
+            # Find a profile directory matching MC version + Fabric/loader
             local match=""
-            while IFS= read -r -d '' d; do
-                local n
-                n=$(basename "$d")
-                if [[ "$n" == *"$MC_VERSION"*fabric* ]] || [[ "$n" == *fabric*"$MC_VERSION"* ]]; then
-                    match="$d"
-                    break
-                fi
-            done < <(find "$versions_dir" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+            match=$(python3 -c "
+import os, glob
+v='$versions_dir'; mv='$MC_VERSION'
+for d in glob.glob(os.path.join(v,'*')):
+    if not os.path.isdir(d): continue
+    n=os.path.basename(d)
+    if mv in n and any(x in n.lower() for x in ['fabric','loader']):
+        print(d); break
+" 2>/dev/null)
 
             if [[ -z "$match" ]]; then
                 echo "No Fabric profile for MC $MC_VERSION in $versions_dir" >&2

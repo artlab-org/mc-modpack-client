@@ -6,9 +6,6 @@
 #   powershell -ExecutionPolicy Bypass -File install.ps1 -Launcher multimc -Instance "artlab"
 #   powershell -ExecutionPolicy Bypass -File install.ps1 -Launcher official
 
-$ErrorActionPreference = "Stop"
-$REPO_URL = "https://raw.githubusercontent.com/artlab-org/mc-modpack-client/main"
-
 # Default params (overridable via CLI flags)
 param(
     [ValidateSet("auto","official","sklauncher","multimc","prism","custom")]
@@ -18,6 +15,8 @@ param(
     [string]$Dir = "",
     [string]$Instance = ""
 )
+$ErrorActionPreference = "Stop"
+$REPO_URL = "https://raw.githubusercontent.com/artlab-org/mc-modpack-client/main"
 
 Write-Host ""
 Write-Host "=== artlab MC modpack installer ===" -ForegroundColor Cyan

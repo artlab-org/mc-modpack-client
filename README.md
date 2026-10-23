@@ -44,6 +44,35 @@ Ouvre PowerShell (touche Windows, tape `powershell`, Entrée), puis colle :
 irm https://raw.githubusercontent.com/artlab-org/mc-modpack-client/main/install.ps1 | iex
 ```
 
+> **Windows PowerShell 5.1** (`powershell.exe`, le défaut sur Windows 10/11) peut
+> échouer avec `The request was aborted: Could not create SSL/TLS secure channel.`
+> Le script force TLS 1.2 **après** avoir été téléchargé — mais si le
+> *téléchargement* échoue, la version qui force TLS n'est jamais atteinte.
+> **Dans ce cas, utilise la variante ci-dessous** qui force TLS 1.2 *avant* le
+> download :
+
+```powershell
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+irm https://raw.githubusercontent.com/artlab-org/mc-modpack-client/main/install.ps1 | iex
+```
+
+> Si même ça échoue (TLS bloqué au niveau OS / proxy d'entreprise), utilise
+> `curl.exe` (intégré à Windows 10 1803+) puis PowerShell :
+
+```powershell
+curl.exe -fsSL https://raw.githubusercontent.com/artlab-org/mc-modpack-client/main/install.ps1 -o "$env:TEMPrtlab-mc-install.ps1"
+powershell -ExecutionPolicy Bypass -File "$env:TEMPrtlab-mc-install.ps1"
+```
+
+> **Le `| iex` ignore les paramètres** (`-Launcher`, `-Version`, `-Clean`) :
+> PowerShell ne transmet pas le bloc `param()` quand le script est *piped*.
+> Si tu dois choisir un launcher précis, télécharge le fichier et utilise `-File`
+> (voir ci-dessus), ou passe par les variables d'environnement :
+
+```powershell
+$env:MC_LAUNCHER = "sklauncher"; irm https://raw.githubusercontent.com/artlab-org/mc-modpack-client/main/install.ps1 | iex
+```
+
 Le script :
 1. Télécharge tous les mods depuis Modrinth CDN
 2. Vérifie les SHA512

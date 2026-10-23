@@ -15,12 +15,36 @@ param(
     [string]$Dir = "",
     [string]$Instance = ""
 )
+
+# ====== Bootstrap: TLS 1.2 + User-Agent + piped-execution overrides ======
+# Windows PowerShell 5.1 (powershell.exe) negotiates TLS 1.0 by default and
+# fails against raw.githubusercontent.com / api.modrinth.com with
+#   'The request was aborted: Could not create SSL/TLS secure channel.'
+try {
+    [Net.ServicePointManager]::SecurityProtocol = `
+        [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+} catch {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+}
+
+# Modrinth's edge rejects the default PowerShell User-Agent.
+$script:HttpUserAgent = 'artlab-mc-installer/1.0 (+https://github.com/artlab-org/mc-modpack-client)'
+
+# When piped (irm | iex) PowerShell drops the param() block, so the CLI flags
+# are IGNORED. Env vars are the reliable way to pass them in that mode.
+if ($env:MC_LAUNCHER) { $Launcher  = $env:MC_LAUNCHER }
+if ($env:MC_VERSION)  { $Version   = $env:MC_VERSION }
+if ($env:MC_DIR)      { $Dir      = $env:MC_DIR }
+if ($env:MC_INSTANCE) { $Instance = $env:MC_INSTANCE }
 $ErrorActionPreference = "Stop"
 $REPO_URL = "https://raw.githubusercontent.com/artlab-org/mc-modpack-client/main"
 
 Write-Host ""
 Write-Host "=== artlab MC modpack installer ===" -ForegroundColor Cyan
 Write-Host "Launcher: $Launcher | MC version: $Version | Clean: $Clean"
+if ($env:MC_LAUNCHER -or $env:MC_VERSION -or $env:MC_DIR -or $env:MC_INSTANCE) {
+    Write-Host "(overrides applied from env vars)" -ForegroundColor DarkGray
+}
 Write-Host ""
 
 # ====== Detect launcher and find mods directory ======
@@ -269,7 +293,7 @@ foreach ($slug in $MODS) {
     $apiUrl = "https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%22$Version%22%5D"
 
     try {
-        $versions = Invoke-RestMethod -Uri $apiUrl -TimeoutSec 30
+        $versions = Invoke-RestMethod -Uri $apiUrl -TimeoutSec 30 -UserAgent $script:HttpUserAgent
     } catch {
         Write-Host "  ERREUR API Modrinth pour $slug : $_" -ForegroundColor Red
         $failed++
@@ -296,7 +320,7 @@ foreach ($slug in $MODS) {
 
     Write-Host "  DL $($file.filename) ($([math]::Round($file.size/1KB)) KB) [$($version.version_number)]..."
     try {
-        Invoke-WebRequest -Uri $file.url -OutFile $dest -TimeoutSec 120 -UseBasicParsing
+        Invoke-WebRequest -Uri $file.url -OutFile $dest -TimeoutSec 120 -UseBasicParsing -UserAgent $script:HttpUserAgent
     } catch {
         Write-Host "  ERREUR telechargement : $_" -ForegroundColor Red
         $failed++

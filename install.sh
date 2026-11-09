@@ -360,7 +360,7 @@ if [[ "$failed" = "0" ]]; then
         echo "3. Lance le jeu"
     fi
     echo "5. Verifie que 'Mod Menu' apparait dans le menu principal"
-    echo "6. Ajoute le serveur : mc.alabalec.net port 25565 (ou lx-gaming:25565 via tailnet)"
+    echo "6. Ajoute le serveur : mc.6ix7even.cc port 25565 (ou artlab:25565 via tailnet)"
     echo "7. Tape /register <password> puis /login <password> en jeu"
     echo ""
     echo "Si probleme : https://github.com/artlab-org/mc-modpack-client/issues"

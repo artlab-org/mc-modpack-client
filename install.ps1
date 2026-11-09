@@ -393,7 +393,7 @@ if ($failed -eq 0) {
         Write-Host "3. Lance le jeu"
     }
     Write-Host "5. Verifie que 'Mod Menu' apparait dans le menu principal"
-    Write-Host "6. Ajoute le serveur : mc.alabalec.net port 25565 (ou lx-gaming:25565 via tailnet)"
+    Write-Host "6. Ajoute le serveur : mc.6ix7even.cc port 25565 (ou artlab:25565 via tailnet)"
     Write-Host "7. Tape /register <password> puis /login <password> en jeu"
     Write-Host ""
     Write-Host "Si probleme : ouvre une issue sur https://github.com/artlab-org/mc-modpack-client/issues"

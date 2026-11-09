@@ -142,8 +142,8 @@ Copie les 13 fichiers `.jar` dans ton dossier `.minecraft/mods/` (dont `plasmovo
 
 Tous les mods ont été téléchargés depuis **Modrinth** (CDN officiel). Tu peux vérifier chaque SHA512 sur la page Modrinth du mod.
 
-| Mod | Version | Taille | Page Modrinth |
-|---|---|---:|---|
+| Mod | Version | Taille |
+|---|---|---:|
 | [fabric-api](https://modrinth.com/mod/fabric-api) | 0.163.0+26.3 | 1,774,707 bytes |
 | [sodium](https://modrinth.com/mod/sodium) | mc26.3-0.9.3-beta.1-fabric | 1,912,496 bytes |
 | [iris](https://modrinth.com/mod/iris) | 1.11.7+26.3-fabric | 2,850,938 bytes |
@@ -160,9 +160,11 @@ Tous les mods ont été téléchargés depuis **Modrinth** (CDN officiel). Tu pe
 | [vanish](https://modrinth.com/mod/vanish) | 1.6.16+26.3 | 1,256,413 bytes |
 | [plasmo-voice](https://modrinth.com/mod/plasmo-voice) | 2.1.17 (`fabric-26.3-2.1.17`) | 12,248,022 bytes |
 
+> Ce tableau liste 15 mods : les **13 mods client** — exactement la liste installée par `install.sh` / `install.ps1`, à copier dans `.minecraft/mods/` — plus `easyauth` et `vanish`, qui tournent **côté serveur** (voir [Compatibilité serveur](#compatibilité-serveur)) et ne sont pas installés par les scripts client.
+
 ### Téléchargement manuel en lot
 
-Pour télécharger tous les mods d'un coup (PowerShell) :
+Pour télécharger les **13 mods du modpack** d'un coup (PowerShell) — même liste et même épinglage de version que `install.sh` / `install.ps1` :
 
 ```powershell
 $mods = @(
@@ -177,15 +179,34 @@ $mods = @(
   @{ slug = "distanthorizons"; version = "3.3.4-26.3" },
   @{ slug = "fabric-language-kotlin"; version = "1.14.2+kotlin.2.4.21" },
   @{ slug = "viafabric"; version = "0.4.22+186-26.x" },
-  @{ slug = "chunky"; version = "1.5.3" }
+  @{ slug = "chunky"; version = "1.5.3" },
+  @{ slug = "plasmo-voice"; version = "fabric-26.3-2.1.17" }
 )
 
+# Versions épinglées (identique à install.sh / install.ps1) :
+# l'API Modrinth renvoie les versions par date décroissante, la 1re peut être
+# une bêta (plasmo-voice 2.2.0-beta.2). On force le version_id stable.
+$pinned = @{ "plasmo-voice" = "vKP6gBRn" }
+
 foreach ($mod in $mods) {
-  $apiUrl = "https://api.modrinth.com/v2/project/$($mod.slug)/version?game_versions=%5B%2226.3%22%5D&loaders=%5B%22fabric%22%5D"
-  $version = (Invoke-RestMethod -Uri $apiUrl)[0]
+  if ($pinned.ContainsKey($mod.slug)) {
+    # Version épinglée : on interroge directement /v2/version/<version_id>
+    $apiUrl = "https://api.modrinth.com/v2/version/$($pinned[$mod.slug])"
+    $version = Invoke-RestMethod -Uri $apiUrl
+  } else {
+    $apiUrl = "https://api.modrinth.com/v2/project/$($mod.slug)/version?game_versions=%5B%2226.3%22%5D&loaders=%5B%22fabric%22%5D"
+    $version = (Invoke-RestMethod -Uri $apiUrl)[0]
+  }
   $file = $version.files[0]
-  Write-Host "Téléchargement $($mod.slug)..." -ForegroundColor Cyan
-  Invoke-WebRequest -Uri $file.url -OutFile "$env:APPDATA\.minecraft\mods\$($file.filename)"
+  $out = "$env:APPDATA\.minecraft\mods\$($file.filename)"
+  Write-Host "Téléchargement $($mod.slug) ($($file.filename))..." -ForegroundColor Cyan
+  Invoke-WebRequest -Uri $file.url -OutFile $out
+  # Vérification SHA-512 (comme les scripts d'installation du modpack)
+  $actual = (Get-FileHash -Path $out -Algorithm SHA512).Hash.ToLower()
+  if ($actual -ne $file.hashes.sha512.ToLower()) {
+    Remove-Item $out -Force
+    throw "SHA-512 mismatch : $($mod.slug) ($($file.filename))"
+  }
 }
 ```
 
@@ -248,13 +269,14 @@ Concrètement : la voix part vers `artlab:25565` en **UDP**, exactement comme le
 
 ### Version installée : la 2.1.17 stable est épinglée
 
-L'API Modrinth renvoie les versions par date décroissante : une recherche générique récupère donc la **bêta `2.2.0-beta.2`** au lieu de la stable. Les scripts d'installation du modpack **épinglent** explicitement la version stable (`vKP6gBRn` → `fabric-26.3-2.1.17`) et vérifient son SHA-512.
+L'API Modrinth renvoie les versions par date décroissante : une requête **générique** sur `/v2/project/plasmo-voice/version` récupère donc la **bêta `2.2.0-beta.2`** au lieu de la stable. C'est pour ça que `install.sh` et `install.ps1` **épinglent** explicitement la version stable (`vKP6gBRn` → `fabric-26.3-2.1.17`) et vérifient son SHA-512 : **le modpack installe toujours la stable, jamais la bêta**.
 
 Si tu installes **à la main**, prends le fichier direct :
 `plasmovoice-fabric-26.3-2.1.17.jar`
 SHA-512 : `00090edb493fc6b632a6825c765ff797f8469625f2c30a44b8d07d920b6fa7159e6671d585d122d272d2e7a6e6a11f2c1cb5f81cbaf2738354ad80abd9fe8f83`
+Lien CDN direct : `https://cdn.modrinth.com/data/1bZhdhsH/versions/vKP6gBRn/plasmovoice-fabric-26.3-2.1.17.jar`
 
-> Le script de téléchargement en lot ci-dessous n'inclut pas `plasmo-voice` (il installe les 12 autres mods). attention : si tu y ajoutes `plasmo-voice`, il prend la **première** version renvoyée par l'API, donc la **bêta** `2.2.0-beta.2`. Pour la voix, prends le **lien direct** ci-dessus.
+> Le script de téléchargement en lot de la section [Liens Modrinth](#liens-modrinth-pour-téléchargement-direct) installe bien les **13 mods**, `plasmo-voice` compris : il l'épingle sur `vKP6gBRn` (`fabric-26.3-2.1.17`), donc **jamais** sur la bêta `2.2.0-beta.2`. Pour installer le mod de voix à la main, prends le **lien direct** ci-dessus.
 
 ---
 
@@ -377,8 +399,8 @@ irm https://raw.githubusercontent.com/artlab-org/mc-modpack-client/main/install.
 
 OU manuellement :
 1. Va dans `versions\<ton_profil_fabric>\mods\`
-2. Supprime tous les .jar qui ne sont PAS dans la liste de mon modpack :
-   `fabric-api`, `sodium`, `iris`, `lithium`, `ferrite-core`, `krypton`, `modmenu`, `cloth-config`, `distanthorizons`, `fabric-language-kotlin`, `viafabric`, `chunky`
+2. Supprime tous les .jar qui ne sont PAS dans la liste de mon modpack (13 mods) :
+   `fabric-api`, `sodium`, `iris`, `lithium`, `ferrite-core`, `krypton`, `modmenu`, `cloth-config`, `distanthorizons`, `fabric-language-kotlin`, `viafabric`, `chunky`, `plasmo-voice`
 3. Relance MC
 
 Note : `ViaFabric` a 2 versions (`viafabric` pour 26.3 et `viafabric-mc26-1` pour 26.1). Tu dois garder uniquement la version **26.3**.

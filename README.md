@@ -1,9 +1,16 @@
 # mc-modpack-client — Modpack client artlab Minecraft (MC 26.3 Fabric)
 
-**Modpack Fabric pour rejoindre le serveur artlab Minecraft (MC 26.3).**
+**Modpack Fabric facultatif pour le serveur artlab Minecraft (MC 26.3).**
 
-> ⚠️ **Sans ce modpack, tu ne peux pas rejoindre le serveur.**
-> Le serveur détecte ton client et t'envoie un message d'erreur avec ce lien si tu n'as pas les mods installés.
+> ℹ️ **Ce modpack est facultatif pour rejoindre le serveur.**
+> Tu peux te connecter et jouer normalement sans le pack. Le pack apporte 4 améliorations :
+>
+> - **Optimisation** — les mods d'optimisation du pack : Sodium (rendu optimisé), Lithium, Krypton, FerriteCore.
+> - **Distant Horizons** — rendu LOD : les chunks lointains sont générés en arrière-plan.
+> - **Shaders** — Iris, pour les shaders (voir « Pourquoi pas OptiFine ? »).
+> - **Chat vocal de proximité** — Plasmo Voice : tu entends les autres et on t'entend quand on est proches dans le monde.
+>
+> Sans le pack, tu perds ces 4 améliorations. Le seul point visible en jeu : **tu n'as pas la voix** — le mod de voix n'est pas obligatoire côté serveur, tu te connectes et tu joues normalement, tu n'entends simplement personne (voir [Chat vocal](#chat-vocal-proximité)).
 
 ---
 
@@ -259,7 +266,7 @@ Le modpack installe **Plasmo Voice 2.1.17** (`plasmovoice-fabric-26.3-2.1.17.jar
 | [plasmo-voice](https://modrinth.com/mod/plasmo-voice) | 2.1.17 (`fabric-26.3-2.1.17`, stable) | `vKP6gBRn` | 12 248 022 octets | [modrinth.com/mod/plasmo-voice](https://modrinth.com/mod/plasmo-voice) |
 
 - Le mod est **installé côté client** : `install.sh` / `install.ps1` le téléchargent avec le reste du modpack, tu n'as rien à faire en plus.
-- **Côté serveur, le mod n'est pas obligatoire pour un joueur** : tu peux te connecter et jouer normalement même si tu ne l'as pas (ou si tu joues sans) — tu as simplement pas la voix.
+- **Côté serveur, le mod de voix est facultatif** : tu peux te connecter et jouer normalement même si tu ne l'as pas (ou si tu joues sans le modpack) — tu as simplement pas la voix.
 - Dépendance : `fabric-api` (déjà présent dans le modpack).
 
 ### Comment vérifier que le mod est chargé

@@ -239,7 +239,26 @@ MODS=(
     "fabric-language-kotlin"
     "viafabric"
     "chunky"
+    "plasmo-voice"
 )
+
+# ====== Versions epinglees ======
+# L'API Modrinth renvoie les versions par date decroissante : prendre la 1re
+# peut installer une beta (ex. plasmo-voice 2.2.0-beta.2 au lieu de la stable).
+# Ces mods sont donc epingles sur un version_id precis (format slug:version_id).
+PINNED_VERSIONS=(
+    "plasmo-voice:vKP6gBRn"
+)
+
+pinned_version_id() {
+    local slug="$1" entry
+    for entry in "${PINNED_VERSIONS[@]}"; do
+        [[ "${entry%%:*}" == "$slug" ]] || continue
+        echo "${entry##*:}"
+        return 0
+    done
+    return 1
+}
 
 echo ""
 echo "Telechargement de ${#MODS[@]} mods depuis Modrinth (MC $MC_VERSION + Fabric)..."
@@ -252,13 +271,30 @@ for slug in "${MODS[@]}"; do
     echo ""
     echo "[$slug]"
 
-    api_url="https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%22$MC_VERSION%22%5D"
+    pinned_id="$(pinned_version_id "$slug" || true)"
+
+    if [[ -n "$pinned_id" ]]; then
+        api_url="https://api.modrinth.com/v2/version/$pinned_id"
+    else
+        api_url="https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%22$MC_VERSION%22%5D"
+    fi
 
     api_json=$(curl -fsS "$api_url" 2>&1) || {
         echo "  ERREUR API Modrinth pour $slug" >&2
         failed=$((failed+1))
         continue
     }
+
+    if [[ -n "$pinned_id" ]]; then
+        # Version epinglee : verifie qu'elle cible bien la version de MC
+        # demandee, puis normalise la reponse en liste (comme l'API projet).
+        if ! echo "$api_json" | python3 -c "import sys,json; d=json.load(sys.stdin); sys.exit(0 if '$MC_VERSION' in d.get('game_versions',[]) else 1)"; then
+            echo "  Version epinglee $pinned_id incompatible avec MC $MC_VERSION, skip"
+            skipped=$((skipped+1))
+            continue
+        fi
+        api_json=$(echo "$api_json" | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps([d]))")
+    fi
 
     # Get first version's first file URL + SHA512 + version + filename
     file_url=$(echo "$api_json" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['files'][0]['url'])" 2>/dev/null) || {

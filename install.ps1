@@ -278,7 +278,16 @@ $MODS = @(
     "fabric-language-kotlin"
     "viafabric"
     "chunky"
+    "plasmo-voice"
 )
+
+# ====== Versions epinglees ======
+# L'API Modrinth renvoie les versions par date decroissante : prendre la 1re
+# peut installer une beta (ex. plasmo-voice 2.2.0-beta.2 au lieu de la stable).
+# Ces mods sont donc epingles sur un version_id precis (slug -> version_id).
+$script:PinnedVersions = @{
+    "plasmo-voice" = "vKP6gBRn"
+}
 
 Write-Host ""
 Write-Host "Telechargement de $($MODS.Count) mods depuis Modrinth (MC $Version + Fabric)..." -ForegroundColor Yellow
@@ -290,14 +299,36 @@ $failed = 0
 foreach ($slug in $MODS) {
     Write-Host ""
     Write-Host "[$slug]" -ForegroundColor Cyan
-    $apiUrl = "https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%22$Version%22%5D"
+    $pinnedId = $null
+    if ($script:PinnedVersions.ContainsKey($slug)) {
+        $pinnedId = $script:PinnedVersions[$slug]
+    }
+
+    if ($pinnedId) {
+        $apiUrl = "https://api.modrinth.com/v2/version/$pinnedId"
+    } else {
+        $apiUrl = "https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%22$Version%22%5D"
+    }
 
     try {
-        $versions = Invoke-RestMethod -Uri $apiUrl -TimeoutSec 30 -UserAgent $script:HttpUserAgent
+        $response = Invoke-RestMethod -Uri $apiUrl -TimeoutSec 30 -UserAgent $script:HttpUserAgent
     } catch {
         Write-Host "  ERREUR API Modrinth pour $slug : $_" -ForegroundColor Red
         $failed++
         continue
+    }
+
+    if ($pinnedId) {
+        # Version epinglee : verifie qu'elle cible bien la version de MC
+        # demandee, puis normalise la reponse en liste (comme l'API projet).
+        if (-not $response.game_versions -or ($response.game_versions -notcontains $Version)) {
+            Write-Host "  Version epinglee $pinnedId incompatible avec MC $Version, skip" -ForegroundColor Yellow
+            $skipped++
+            continue
+        }
+        $versions = @($response)
+    } else {
+        $versions = $response
     }
 
     if (-not $versions -or $versions.Count -eq 0) {

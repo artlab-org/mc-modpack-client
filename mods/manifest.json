@@ -134,6 +134,17 @@
       "size": 354095,
       "downloads": 1186864,
       "release": "2026-05-04T05:47:16.215347Z"
+    },
+    {
+      "slug": "plasmo-voice",
+      "version": "fabric-26.3-2.1.17",
+      "filename": "plasmovoice-fabric-26.3-2.1.17.jar",
+      "url": "https://cdn.modrinth.com/data/1bZhdhsH/versions/vKP6gBRn/plasmovoice-fabric-26.3-2.1.17.jar",
+      "sha512": "00090edb493fc6b632a6825c765ff797f8469625f2c30a44b8d07d920b6fa7159e6671d585d122d272d2e7a6e6a11f2c1cb5f81cbaf2738354ad80abd9fe8f83",
+      "sha1": "f4fd4483284c2aca75bd22d97e39fc85398c05a0",
+      "size": 12248022,
+      "downloads": 12606,
+      "release": "2026-09-15T20:50:51.355189Z"
     }
   ]
 }

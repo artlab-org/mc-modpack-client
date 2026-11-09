@@ -14,9 +14,10 @@
 3. [Installation manuelle](#installation-manuelle)
 4. [Liens Modrinth (téléchargement direct)](#liens-modrinth-pour-téléchargement-direct)
 5. [Accès au serveur](#accès-au-serveur)
-6. [Compatibilité launcher](#compatibilité-launcher)
-7. [Upgrade](#upgrade)
-8. [Notes](#notes)
+6. [Chat vocal (proximité)](#chat-vocal-proximité)
+7. [Compatibilité launcher](#compatibilité-launcher)
+8. [Upgrade](#upgrade)
+9. [Notes](#notes)
 
 ---
 
@@ -29,7 +30,7 @@
   - **TLauncher** (crack)
   - **SKLauncher** (crack)
   - **MultiMC / Prism Launcher** (open-source)
-- 1 GB d'espace disque (mods = ~50 MB)
+- 1 GB d'espace disque (mods = ~62 Mio pour les 13 `.jar` du modpack)
 - 4 GB RAM alloués au jeu (recommandé 6 GB pour Distant Horizons)
 
 ---
@@ -120,7 +121,7 @@ Va sur [Modrinth](https://modrinth.com), cherche chaque mod, vérifie la compati
 
 ### Étape 3 — Copier les mods
 
-Copie les 12 fichiers `.jar` dans ton dossier `.minecraft/mods/` :
+Copie les 13 fichiers `.jar` dans ton dossier `.minecraft/mods/` (dont `plasmovoice-fabric-26.3-2.1.17.jar` pour le chat vocal) :
 
 | OS | Chemin typique |
 |---|---|
@@ -157,6 +158,7 @@ Tous les mods ont été téléchargés depuis **Modrinth** (CDN officiel). Tu pe
 | [chunky](https://modrinth.com/mod/chunky) | 1.5.3 | 354,095 bytes |
 | [easyauth](https://modrinth.com/mod/easyauth) | 3.4.4 | 24,257,433 bytes |
 | [vanish](https://modrinth.com/mod/vanish) | 1.6.16+26.3 | 1,256,413 bytes |
+| [plasmo-voice](https://modrinth.com/mod/plasmo-voice) | 2.1.17 (`fabric-26.3-2.1.17`) | 12,248,022 bytes |
 
 ### Téléchargement manuel en lot
 
@@ -210,6 +212,49 @@ Les admins (ElNadou, ElPouleto, arthur) ont accès à :
 - `/vanish` — devenir invisible
 - `/gamemode`, `/tp`, `/give`, `/effect`, `/weather`, `/time`
 - `/op <pseudo>` — promouvoir un joueur (niveau 4 = tout)
+
+---
+
+## Chat vocal (proximité)
+
+Le modpack installe **Plasmo Voice 2.1.17** (`plasmovoice-fabric-26.3-2.1.17.jar`) : c'est le mod de **chat vocal de proximité**. On t'entend et on entend les autres quand on est proches dans le monde ; le volume baisse avec la distance.
+
+| Mod | Version | `version_id` Modrinth | Taille | Page Modrinth |
+|---|---|---|---|---|
+| [plasmo-voice](https://modrinth.com/mod/plasmo-voice) | 2.1.17 (`fabric-26.3-2.1.17`, stable) | `vKP6gBRn` | 12 248 022 octets | [modrinth.com/mod/plasmo-voice](https://modrinth.com/mod/plasmo-voice) |
+
+- Le mod est **installé côté client** : `install.sh` / `install.ps1` le téléchargent avec le reste du modpack, tu n'as rien à faire en plus.
+- **Côté serveur, le mod n'est pas obligatoire pour un joueur** : tu peux te connecter et jouer normalement même si tu ne l'as pas (ou si tu joues sans) — tu as simplement pas la voix.
+- Dépendance : `fabric-api` (déjà présent dans le modpack).
+
+### Comment vérifier que le mod est chargé
+
+1. **Mod Menu** (le modpack contient Mod Menu 21.0.0) : dans le menu principal, ouvre **Mods** → la liste doit contenir **Plasmo Voice**, version **2.1.17**. C'est le contrôle le plus rapide.
+2. **Dossier des mods** : le fichier `plasmovoice-fabric-26.3-2.1.17.jar` doit être présent dans `.minecraft/mods/` (ou `versions/<ton_profil>/mods/`).
+3. **Log de lancement** : dans `logs/latest.log`, cherche `plasmovoice` — le mod doit apparaître dans les lignes de chargement.
+
+### Réseau : le même port que le jeu
+
+Le serveur Artlab utilise **le port 25565 pour les deux** — même adresse, même port, protocole différent :
+
+| Flux | Protocole | Port |
+|---|---|---|
+| Minecraft (jeu) | TCP | 25565 |
+| Plasmo Voice (voix) | UDP | 25565 |
+
+Concrètement : la voix part vers `artlab:25565` en **UDP**, exactement comme le jeu part vers `artlab:25565` en **TCP**.
+
+> Si tu es derrière un firewall ou un NAT, il faut autoriser **UDP 25565 en sortie** vers le serveur, en plus du TCP. Le port UDP est ouvert côté serveur par une **action manuelle d'Arthur** (règle de firewall Hetzner) : tant qu'elle n'est pas faite, tu te connectes au jeu mais tu n'entends personne.
+
+### Version installée : la 2.1.17 stable est épinglée
+
+L'API Modrinth renvoie les versions par date décroissante : une recherche générique récupère donc la **bêta `2.2.0-beta.2`** au lieu de la stable. Les scripts d'installation du modpack **épinglent** explicitement la version stable (`vKP6gBRn` → `fabric-26.3-2.1.17`) et vérifient son SHA-512.
+
+Si tu installes **à la main**, prends le fichier direct :
+`plasmovoice-fabric-26.3-2.1.17.jar`
+SHA-512 : `00090edb493fc6b632a6825c765ff797f8469625f2c30a44b8d07d920b6fa7159e6671d585d122d272d2e7a6e6a11f2c1cb5f81cbaf2738354ad80abd9fe8f83`
+
+> Le script de téléchargement en lot ci-dessous n'inclut pas `plasmo-voice` (il installe les 12 autres mods). attention : si tu y ajoutes `plasmo-voice`, il prend la **première** version renvoyée par l'API, donc la **bêta** `2.2.0-beta.2`. Pour la voix, prends le **lien direct** ci-dessus.
 
 ---
 
@@ -269,6 +314,7 @@ MC 26.3 utilise Java 25 LTS. Si ton launcher propose une option « Java version 
 Le serveur attendu doit tourner avec :
 - **Fabric Loader 0.19.5** (auto-installé via `itzg/minecraft-server`)
 - **Mods serveur** (déjà installés) : EasyAuth, Vanish, ViaFabric, Lithium, FerriteCore, Krypton, Distant Horizons
+- **Plasmo Voice** — installé côté serveur pour le chat vocal de proximité (voir [Chat vocal](#chat-vocal-proximité))
 
 Si le serveur est down, contacte un admin.
 

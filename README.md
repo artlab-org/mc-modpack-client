@@ -228,12 +228,12 @@ foreach ($mod in $mods) {
 
 ## Accès au serveur
 
-- **Tailnet** : `lx-gaming:25565` (100.83.118.18:25565) — pour les accès internes
-- **Public** : `mc.alabalec.net:25565` — ⚠️ pas encore routé publiquement (work in progress)
+- **Tailnet** : `artlab:25565` (100.70.152.40:25565) — pour les accès internes
+- **Public** : `mc.6ix7even.cc:25565` (A public → `195.201.220.239`)
 
 ### Première connexion
 
-1. Ajoute le serveur dans ton launcher : `lx-gaming` port `25565`
+1. Ajoute le serveur dans ton launcher : `artlab` port `25565` (en tailnet), ou `mc.6ix7even.cc` port `25565` (en accès public)
 2. Connecte-toi avec **n'importe quel pseudo** (online-mode=false → crack + premium OK)
 3. Tape `/register <ton_mot_de_passe>` (ex : `/register abc123`)
 4. Tape `/login <ton_mot_de_passe>` pour te reconnecter
@@ -277,7 +277,7 @@ Le serveur Artlab utilise **le port 25565 pour les deux** — même adresse, mê
 | Minecraft (jeu) | TCP | 25565 |
 | Plasmo Voice (voix) | UDP | 25565 |
 
-Concrètement : la voix part vers `artlab:25565` en **UDP**, exactement comme le jeu part vers `artlab:25565` en **TCP**.
+Concrètement : la voix part vers **la même adresse que celle utilisée pour le jeu** : `mc.6ix7even.cc:25565` en accès public, ou `artlab:25565` en tailnet. Le jeu utilise **TCP** et la voix **UDP** sur le port `25565` ; cette correspondance d'adresse et de port est la condition pour que la whitelist `25565/UDP` corresponde au trafic de voix.
 
 > Si tu es derrière un firewall ou un NAT, il faut autoriser **UDP 25565 en sortie** vers le serveur, en plus du TCP. Le port UDP est ouvert côté serveur par une **action manuelle d'Arthur** (règle de firewall Hetzner) : tant qu'elle n'est pas faite, tu te connectes au jeu mais tu n'entends personne.
 

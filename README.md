@@ -199,6 +199,9 @@ $mods = @(
 # une bêta (plasmo-voice 2.2.0-beta.2). On force le version_id stable.
 $pinned = @{ "plasmo-voice" = "vKP6gBRn" }
 
+# Créer le dossier cible s'il n'existe pas (comme install.ps1:251-252) :
+New-Item -ItemType Directory -Path "$env:APPDATA\.minecraft\mods" -Force | Out-Null
+
 foreach ($mod in $mods) {
   if ($pinned.ContainsKey($mod.slug)) {
     # Version épinglée : on interroge directement /v2/version/<version_id>

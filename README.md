@@ -61,8 +61,8 @@ irm https://raw.githubusercontent.com/artlab-org/mc-modpack-client/main/install.
 > `curl.exe` (intégré à Windows 10 1803+) puis PowerShell :
 
 ```powershell
-curl.exe -fsSL https://raw.githubusercontent.com/artlab-org/mc-modpack-client/main/install.ps1 -o "$env:TEMPrtlab-mc-install.ps1"
-powershell -ExecutionPolicy Bypass -File "$env:TEMPrtlab-mc-install.ps1"
+curl.exe -fsSL https://raw.githubusercontent.com/artlab-org/mc-modpack-client/main/install.ps1 -o "$env:TEMP\rtlab-mc-install.ps1"
+powershell -ExecutionPolicy Bypass -File "$env:TEMP\rtlab-mc-install.ps1"
 ```
 
 > **Le `| iex` ignore les paramètres** (`-Launcher`, `-Version`, `-Clean`) :
@@ -167,6 +167,17 @@ Tous les mods ont été téléchargés depuis **Modrinth** (CDN officiel). Tu pe
 Pour télécharger les **13 mods du modpack** d'un coup (PowerShell) — même liste et même épinglage de version que `install.sh` / `install.ps1` :
 
 ```powershell
+# Prérequis Windows PowerShell 5.1 — identiques à ceux d'install.ps1 :
+# - TLS 1.2 forcé (PS 5.1 négocie TLS 1.0 par défaut → échec « SSL/TLS secure channel »)
+try {
+    [Net.ServicePointManager]::SecurityProtocol = `
+        [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+} catch {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+}
+# - User-Agent explicite (l'edge Modrinth rejette le User-Agent PowerShell par défaut)
+$ua = 'artlab-mc-installer/1.0 (+https://github.com/artlab-org/mc-modpack-client)'
+
 $mods = @(
   @{ slug = "fabric-api"; version = "0.163.0+26.3" },
   @{ slug = "sodium"; version = "mc26.3-0.9.3-beta.1-fabric" },
@@ -192,15 +203,15 @@ foreach ($mod in $mods) {
   if ($pinned.ContainsKey($mod.slug)) {
     # Version épinglée : on interroge directement /v2/version/<version_id>
     $apiUrl = "https://api.modrinth.com/v2/version/$($pinned[$mod.slug])"
-    $version = Invoke-RestMethod -Uri $apiUrl
+    $version = Invoke-RestMethod -Uri $apiUrl -TimeoutSec 30 -UserAgent $ua
   } else {
     $apiUrl = "https://api.modrinth.com/v2/project/$($mod.slug)/version?game_versions=%5B%2226.3%22%5D&loaders=%5B%22fabric%22%5D"
-    $version = (Invoke-RestMethod -Uri $apiUrl)[0]
+    $version = (Invoke-RestMethod -Uri $apiUrl -TimeoutSec 30 -UserAgent $ua)[0]
   }
   $file = $version.files[0]
   $out = "$env:APPDATA\.minecraft\mods\$($file.filename)"
   Write-Host "Téléchargement $($mod.slug) ($($file.filename))..." -ForegroundColor Cyan
-  Invoke-WebRequest -Uri $file.url -OutFile $out
+  Invoke-WebRequest -Uri $file.url -OutFile $out -TimeoutSec 120 -UseBasicParsing -UserAgent $ua
   # Vérification SHA-512 (comme les scripts d'installation du modpack)
   $actual = (Get-FileHash -Path $out -Algorithm SHA512).Hash.ToLower()
   if ($actual -ne $file.hashes.sha512.ToLower()) {
